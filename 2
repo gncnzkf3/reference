@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <!-- Swiper CSS -->
+  <link rel="stylesheet" href="swiper-bundle.min.css">
+  <style>
+    /* Outer swiper container */
+    .swiper.marquee-swiper {
+      margin-top: 4rem;
+      mask-image: linear-gradient(
+        to right,
+        transparent 0%,
+        white 10%,
+        white 90%,
+        transparent 100%
+      );
+    }
+
+    .swiper-wrapper.marquee-swiper {
+      transition-timing-function: linear;
+      align-items: center;
+    }
+
+    /* Individual slides */
+    .swiper-slide.marquee-swiper {
+      width: 12rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .marquee-navi {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      border: 1px solid #000;
+    }
+    .marquee-navi .swiper-button-prev, 
+    .marquee-navi .swiper-button-next {
+      width: 20px;
+      height: 20px;
+      left: unset;
+      right: unset;
+      top: unset;
+      margin: 0;
+
+    }
+    .marquee-navi .swiper-button-prev::after, 
+    .marquee-navi .swiper-button-next::after {
+      content: '';  width: 10px; height: 10px;
+    }
+
+    .marquee-navi .swiper-button-prev {
+      position: relative;
+    }
+    .marquee-navi .swiper-button-next {
+      position: relative;
+    }
+  </style>
+
+</head>
+<body>
+  <!-- Swiper HTML Structure -->
+  <div class="swiper marquee-swiper">
+    <div class="swiper-wrapper marquee-swiper">
+      <div class="swiper-slide marquee-swiper">Logo 1</div>
+      <div class="swiper-slide marquee-swiper">Logo 2</div>
+      <div class="swiper-slide marquee-swiper">Logo 3</div>
+      <div class="swiper-slide marquee-swiper">Logo 4</div>
+      <div class="swiper-slide marquee-swiper">Logo 5</div>
+    </div>
+
+    <!-- If we need navigation buttons -->
+    <div class="marquee-navi">
+          <button type="button" class="swiper-button-prev"> < </button>
+          <button type="button" class="stop">스탑</button>
+          <button type="button" class="start">재생</button>
+          <button type="button" class="swiper-button-next"> > </button>
+    </div>
+
+</div>
+
+<script src="swiper-bundle.min.js"></script>
+
+<script>
+  // const mySwiper = new Swiper(".marquee-swiper", {
+  //   slidesPerView: "auto",         // Slides take up the width defined in our CSS
+  //   spaceBetween: 160,             // Adds breathing room between logos
+  //   loop: true,                    // If it doesn’t loop, what are we even doing here?
+  //   speed: 6000,                   // Time in ms for one slide to transition. Change this to your liking.
+  //   allowTouchMove: false,         // It’s a marquee, not an interactive carnival ride
+  //   autoplay: {
+  //     delay: 0,                    // 1 millisecond delay: we’re moving nonstop. Try 0 here too :).
+  //     disableOnInteraction: false  // If someone tries to touch, let them fail in peace
+  //   }
+  // });
+
+  const swiper = new Swiper('.swiper', {
+    // slidesPerView: "auto",         // Slides take up the width defined in our CSS
+    // spaceBetween: 160,             // Adds breathing room between logos
+    // loop: true,                    // If it doesn’t loop, what are we even doing here?
+    // speed: 3000,                   // Time in ms for one slide to transition. Change this to your liking.
+    // allowTouchMove: false,         // It’s a marquee, not an interactive carnival ride
+    // autoplay: {
+    //   delay: 1,                    // 1 millisecond delay: we’re moving nonstop. Try 0 here too :).
+    //   disableOnInteraction: false  // If someone tries to touch, let them fail in peace
+    // },
+    // spaceBetween: 160,
+    // navigation: {
+    //   nextEl: '.swiper-button-next',
+    //   prevEl: '.swiper-button-prev',
+    // },
+
+    spaceBetween: 0,
+    freeMode: false,
+    enteredSlides: true,
+    speed: 5000,
+    autoplay: {
+      delay: 1,
+    },
+    loop: true,
+    slidesPerView:'auto',
+    allowTouchMove: false,
+    disableOnInteraction: true
+  });
+
+  const stopBtn = document.querySelector('.stop');
+  const startBtn = document.querySelector('.start');
+
+  stopBtn.addEventListener('click', () => {
+    swiper.autoplay.stop();
+  })
+
+  startBtn.addEventListener('click', () => {
+    swiper.autoplay.start();
+  })
+
+</script>
+</body>
+</html>
