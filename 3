@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Document</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  
+  <div id="content">
+    <div class="marquee_wrap">
+      <div class="marquee_slide pc" role="region" title="이미지 슬라이더">
+        <div class="slide">1</div>
+        <div class="slide">2123</div>
+        <div class="slide">31234</div>
+        <div class="slide">412312312</div>
+        <div class="slide">51</div>
+        <div class="slide">1</div>
+        <div class="slide">2123</div>
+        <div class="slide">31234</div>
+        <div class="slide">412312312</div>
+        <div class="slide">51</div>
+      </div>
+
+      <div class="marquee_slide mobile" role="region" title="이미지 슬라이더">
+        <div class="slide">1</div>
+        <div class="slide">2123</div>
+        <div class="slide">31234</div>
+        <div class="slide">412312312</div>
+        <div class="slide">51</div>
+        <div class="slide">1</div>
+        <div class="slide">2123</div>
+        <div class="slide">31234</div>
+        <div class="slide">412312312</div>
+        <div class="slide">51</div>
+      </div>
+
+      <div class="marquee_control">
+        <button type="button" class="control_btn prev" aria-label="슬라이더 이전 버튼">이전</button>
+        <button type="button" class="control_btn play" aria-label="슬라이더 정지 버튼">재생</button>
+        <button type="button" class="control_btn next" aria-label="슬라이더 다음 버튼">다음</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+
+    function getSlideWidths(track) {
+      var slides = track.querySelectorAll('.slide');
+      var result = [];
+      for (var i = 0; i < slides.length; i++) {
+        result.push(slides[i].offsetWidth);
+      }
+      return result;
+    }
+
+    var scrollX = 0;
+    var slideProgress = 0;
+    var currentIndex = 0;
+
+    var scrollXMo = 0;
+    var slideProgressMo = 0;
+    var currentIndexMo = 0;
+
+    var animationId = null;
+    var isTransitioning = false;
+
+    var marqueeTrack = document.querySelector('.marquee_slide.pc');
+    var marqueeTrackMobile = document.querySelector('.marquee_slide.mobile');
+
+    var prevBtn = document.querySelector('.marquee_control .prev');
+    var playBtn = document.querySelector('.marquee_control .play');
+    var nextBtn = document.querySelector('.marquee_control .next');
+
+    var slideWidths = getSlideWidths(marqueeTrack);
+    var slideWidthsMo = getSlideWidths(marqueeTrackMobile).reverse();
+
+    var SLIDE_GAP = 10;
+    var SLIDE_COUNT = slideWidths.length / 2;
+    var SLIDE_WIDTH = marqueeTrack.scrollWidth;
+  
+    function updateMarquee(x, element, direction, widths) {
+      if (slideProgress > widths[currentIndex]) {
+        currentIndex++;
+        slideProgress = 0;
+      }
+
+      if(x > SLIDE_WIDTH / 2) {
+        element.style.transform = 'translate3d(0, 0, 0)';        
+        x = 0;
+        currentIndex = 0;
+        slideProgress = 0;
+      }
+
+      element.style.transform = 'translate3d(' + (direction * x) + 'px, 0, 0)';
+      return x;
+    }
+
+    function updateMarqueeMo(x, element, direction, widths) {
+      if (slideProgressMo > widths[currentIndex]) {
+        currentIndexMo++;
+        slideProgressMo = 0;
+      }
+
+      if(x > SLIDE_WIDTH / 2) {
+        element.style.transform = 'translate3d(0, 0, 0)';        
+        x = 0;
+        currentIndexMo = 0;
+        slideProgressMo = 0;
+      }
+
+      element.style.transform = 'translate3d(' + (direction * x) + 'px, 0, 0)';
+      return x;
+    }
+
+
+    function resetState() {
+      scrollX = 0;
+      currentIndex = 0;
+      slideProgress = 0;
+
+      scrollXMo = 0;
+      currentIndexMo = 0;
+      slideProgressMo = 0;
+    }
+
+    function animateMarquee() {
+      scrollX += 1;
+      slideProgress += 1;
+
+      scrollXMo += 1;
+      slideProgressMo += 1;
+
+      scrollX = updateMarquee(scrollX, marqueeTrack, -1, slideWidths);
+      scrollXMo = updateMarqueeMo(scrollXMo, marqueeTrackMobile, 1, slideWidthsMo);
+
+      animationId = window.requestAnimationFrame(animateMarquee);
+    }
+
+    function togglePlayPause() {
+      var isPlaying = playBtn.classList.contains('stop');
+
+      if (!isPlaying) {
+        playBtn.classList.add('stop');
+        cancelAnimationFrame(animationId);
+        playBtn.innerText = '정지';
+      } else {
+        playBtn.classList.remove('stop');
+        animateMarquee();
+        playBtn.innerText = '재생';
+      }
+    }
+
+    function stopAnimationTemporarily() {
+      cancelAnimationFrame(animationId);
+      playBtn.classList.add('stop');
+      playBtn.innerText = '정지';
+      playBtn.removeEventListener('click', togglePlayPause);
+    }
+
+    function getOffsetUntil(index) {
+      var sum = 0;
+      for (var i = 0; i < index; i++) {
+        sum += slideWidths[i];
+      }
+      return sum + SLIDE_GAP * index;
+    }
+
+    function getOffsetUntilMo(index) {
+      var sum = 0;
+      for (var i = 0; i < index; i++) {
+        sum += slideWidthsMo[i];
+      }
+      return sum + SLIDE_GAP * index;
+    }
+
+    function goToNextSlide() {
+      if (isTransitioning) return 
+      isTransitioning = true;
+      stopAnimationTemporarily();
+
+      var offset = getOffsetUntil(currentIndex + 1);
+      var offsetMo = getOffsetUntilMo(currentIndexMo + 1);
+
+      marqueeTrack.style.transition = 'transform 1s';
+      marqueeTrack.style.transform = 'translate3d(-' + offset + 'px, 0, 0)';
+
+      marqueeTrackMobile.style.transition = 'transform 1s';
+      marqueeTrackMobile.style.transform = 'translate3d('+ offsetMo + 'px, 0, 0)';
+
+      setTimeout(function () {
+        marqueeTrack.style.transition = 'none';
+        marqueeTrackMobile.style.transition = 'none';
+        playBtn.addEventListener('click', togglePlayPause);
+        isTransitioning = false;
+      }, 1000);
+
+      currentIndex++;
+      currentIndexMo++;
+      scrollX = offset;
+      scrollXMo = offsetMo;
+      slideProgress = 0;
+      slideProgressMo = 0;
+
+      if (currentIndex === SLIDE_COUNT) {
+        setTimeout(function () {
+          resetState();
+          marqueeTrack.style.transition = 'none';
+          marqueeTrack.style.transform = 'translate3d(0, 0, 0)';
+          marqueeTrackMobile.style.transition = 'none';
+          marqueeTrackMobile.style.transform = 'translate3d(0, 0, 0)';
+        }, 1010);
+      }
+    }
+
+    function goToPrveSlide() {
+      if (isTransitioning) return
+      isTransitioning = true;
+      stopAnimationTemporarily();
+
+      if(currentIndex === 0) {
+        var initWidth = SLIDE_WIDTH / 2;
+        var totalWidth = getOffsetUntil(SLIDE_COUNT);
+        marqueeTrack.style.transition = 'none';
+        marqueeTrackMobile.style.transition = 'none';
+ 
+
+        if(scrollX > totalWidth) {
+          console.log('a')
+          marqueeTrack.style.transform = `translate3d(${-(initWidth + 10)}px, 0, 0)`
+          marqueeTrackMobile.style.transform = `translate3d(${(initWidth + 10)}px, 0, 0)`
+
+        } else {
+          console.log('b')
+          marqueeTrack.style.transform = `translate3d(${-(initWidth + scrollX + 10)}px, 0, 0)`
+          marqueeTrackMobile.style.transform = `translate3d(${(initWidth + scrollXMo + 10)}px, 0, 0)`
+        }
+
+        setTimeout(function() {
+          currentIndex = SLIDE_COUNT - 1;
+          currentIndexMo = SLIDE_COUNT - 1;
+          var offset = getOffsetUntil(currentIndex);
+          var offsetMo = getOffsetUntilMo(currentIndexMo);
+
+          marqueeTrack.style.transition = 'transform 1s';
+          marqueeTrack.style.transform = `translate3d(${-offset}px, 0, 0)`;
+
+          marqueeTrackMobile.style.transition = 'transform 1s';
+          marqueeTrackMobile.style.transform = `translate3d(${offsetMo}px, 0, 0)`;
+
+          setTimeout(function() {
+            marqueeTrack.style.transition = 'none';
+            marqueeTrackMobile.style.transition = 'none';
+
+            playBtn.addEventListener('click', togglePlayPause);
+            isTransitioning = false;
+          }, 1000)
+
+          scrollX = offset;
+          slideProgress = 0;
+
+          scrollXMo = offsetMo;
+          slideProgressMo = 0;
+        }, 20)
+
+        return;
+      }
+
+      currentIndex--;
+      currentIndexMo--;
+      var offsetPrev = getOffsetUntil(currentIndex);
+      var offsetPrevMo =  getOffsetUntilMo(currentIndexMo);
+
+      marqueeTrack.style.transition = 'transform 1s';
+      marqueeTrack.style.transform = 'translate3d(-' + offsetPrev + 'px, 0, 0)';
+
+      marqueeTrackMobile.style.transition = 'transform 1s';
+      marqueeTrackMobile.style.transform = 'translate3d('+ offsetPrevMo + 'px, 0, 0)';
+
+      setTimeout(function () {
+        marqueeTrack.style.transition = 'none';
+        marqueeTrackMobile.style.transition = 'none';
+        
+        playBtn.addEventListener('click', togglePlayPause);
+        isTransitioning = false;
+      }, 1000);
+
+      scrollX = offsetPrev;
+      scrollXMo = offsetPrevMo;
+      slideProgress = 0;
+      slideProgressMo = 0;
+    }
+
+    animateMarquee();
+    playBtn.addEventListener('click', togglePlayPause);
+    nextBtn.addEventListener('click', throttle(goToNextSlide, 1000))
+    prevBtn.addEventListener('click', throttle(goToPrveSlide, 1000))
+
+  function throttle(func, limit) {
+    let lastCall = 0;
+
+    return function (...args) {
+      const now = Date.now();
+      if (now - lastCall >= limit) {
+        lastCall = now;
+        func.apply(this, args);
+      }
+    };
+  }
+
+  </script>
+</body>
+</html>
